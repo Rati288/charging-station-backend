@@ -1,1 +1,8 @@
+# Ignore macOS system files
+.DS_Store
+.Trash/
+.bash_history
+
+# Ignore node_modules and env files
+node_modules/
 .env
