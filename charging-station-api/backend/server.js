@@ -1,40 +1,41 @@
-// server.js
 const express = require('express');
+const cors = require('cors');
 const helmet = require('helmet');
-const apiLimiter = require('./middleware/rateLimit');
-const sanitizeMiddleware = require('./middleware/sanitize');
+const { Station, User } = require('./models');
+
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
 
 // Middlewares
-app.use(helmet()); // Security headers
-app.use(express.json()); // Parse JSON request bodies
-app.use(sanitizeMiddleware); // Sanitize input data
-app.use('/api/', apiLimiter); // Apply rate limiting to all /api routes
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
 
-// Import routes
-const authRoutes = require('./routes/auth');
-const healthRoutes = require('./routes/health');
-const stationRoutes = require('./routes/station');
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/stations', require('./routes/station'));
+app.use('/api/health', require('./routes/health'));
 
-// Use routes with /api prefix
-app.use('/api/auth', authRoutes);
-app.use('/api/health', healthRoutes);
-app.use('/api/stations', stationRoutes);
-
-// Default route for testing
-app.get('/', (req, res) => {
-  res.send('Welcome to Charging Station API');
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { error: err.message })
+  });
 });
 
-// Handle 404 - Not Found
+// 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({ message: 'Route not found' });
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });

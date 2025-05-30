@@ -1,4 +1,4 @@
-const { Sequelize } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
 const sequelize = new Sequelize(
@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST || 'localhost',
     dialect: 'postgres',
     port: process.env.DB_PORT || 5432,
-    logging: process.env.NODE_ENV === 'development',
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
       max: 5,
       min: 0,
@@ -19,20 +19,26 @@ const sequelize = new Sequelize(
   }
 );
 
-async function testConnection() {
+// Import models by passing sequelize and DataTypes
+const Station = require('./station.model')(sequelize, DataTypes);
+const User = require('./user')(sequelize, DataTypes);
+
+// Define associations if any
+// Example: User.hasMany(Station);
+
+const testConnection = async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅ Database connected successfully.');
+    console.log('✅ Database connection established successfully.');
   } catch (error) {
     console.error('❌ Unable to connect to the database:', error);
     process.exit(1);
   }
-}
-
-// Test connection on startup
-testConnection();
+};
 
 module.exports = {
   sequelize,
-  testConnection
+  testConnection,
+  Station,
+  User
 };

@@ -1,4 +1,7 @@
-const Station = require('../models/station.model');
+const db = require('../models'); // ✅ Should point to models directory
+const { Station } = require('../models'); // ✅ Correct way to import the model
+
+
 
 exports.getAllStations = async (req, res) => {
   try {

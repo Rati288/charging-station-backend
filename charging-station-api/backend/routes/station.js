@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middleware/auth.middleware');
-const Station = require('../models/station.model');
+const StationController = require('../controllers/station.controller');
+
 const {
   getAllStations,
   getStation,
