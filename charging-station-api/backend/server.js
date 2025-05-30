@@ -1,10 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const { Station, User } = require('./models');
-
 const morgan = require('morgan');
 require('dotenv').config();
+
+const { testConnection } = require('./models'); // Import the DB test function
 
 const app = express();
 
@@ -33,9 +33,18 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Start server
+// Start server only after DB connection is successful
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+
+(async () => {
+  try {
+    await testConnection();
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server due to DB connection error:', err);
+    process.exit(1); // Exit process if DB connection fails
+  }
+})();
